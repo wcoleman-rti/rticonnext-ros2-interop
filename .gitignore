@@ -1,0 +1,17 @@
+.vscode
+build/
+install/
+bin/
+log/
+temp
+*.o
+*.obj
+*.exe
+*.dll
+*.pdb
+
+*.pcap
+
+*.zip
+*.tar.gz
+*.tgz
