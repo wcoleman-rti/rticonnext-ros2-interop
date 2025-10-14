@@ -43,7 +43,8 @@ class InstancePublisher
 {
 public:
 
-  explicit InstancePublisher(int id = 0, unsigned int domain_id = 0)
+  explicit InstancePublisher(int id = 0, unsigned int domain_id = 0) 
+  : id_(id)
   {
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
     dds::domain::DomainParticipant participant(domain_id);
@@ -56,6 +57,12 @@ public:
 
   void run()
   {
+    fprintf(stdout, "Starting" 
+        #ifdef USE_SHMEM_REF
+        " (SHMEM_REF)"
+        #endif
+        " publisher with id %d\n", id_);
+
     std::string user_input;
     while (!shutdown_requested.load()) {
       std::cout << "> ";
@@ -108,11 +115,6 @@ int main(int argc, char * argv[])
   if (argc > 1) {
     id = std::atoi(argv[1]);
   }
-  fprintf(stdout, "Starting" 
-    #ifdef USE_SHMEM_REF
-    " (SHMEM_REF)"
-    #endif
-    " publisher with id %d\n", id);
   rti::util::network_capture::enable();
   rti::util::network_capture::start("capture");
   std::make_shared<ros2_interop::InstancePublisher>(id)->run();

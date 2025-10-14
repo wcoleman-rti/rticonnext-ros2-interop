@@ -18,6 +18,7 @@
 #include <instances/msg/Instance.hpp>
 #include <dds/dds.hpp>
 #include <rti/rti.hpp>
+#include <rti/sub/SampleProcessor.hpp>
 
 std::atomic<bool> shutdown_requested{false};
 
@@ -65,6 +66,12 @@ public:
 
   void run()
   {
+    fprintf(stdout, "Starting" 
+        #ifdef USE_SHMEM_REF
+        " (SHMEM_REF)"
+        #endif
+        " subscriber\n");
+
     while (!shutdown_requested.load()) {
         rti::util::sleep(dds::core::Duration(1));
     }
@@ -90,11 +97,6 @@ int main(int argc, char * argv[])
   setup_signal_handlers();
   (void)argc;
   (void)argv;
-  fprintf(stdout, "Starting" 
-    #ifdef USE_SHMEM_REF
-    " (SHMEM_REF)"
-    #endif
-    " subscriber\n");
   std::make_shared<ros2_interop::InstanceSubscriber>()->run();
   dds::domain::DomainParticipant::finalize_participant_factory();
   return 0;

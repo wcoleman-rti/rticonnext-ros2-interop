@@ -42,6 +42,16 @@ public:
         callback);
   }
 
+  void run()
+  {
+    RCLCPP_INFO(this->get_logger(), "Starting"
+      " subscriber");
+
+    while (rclcpp::ok()) {
+      rclcpp::spin_some(shared_from_this());
+    }
+  }
+
   ~InstanceSubscriber() override
   {
     RCLCPP_INFO(this->get_logger(), "Finalized subscriber, received %d msgs", count_);
@@ -59,8 +69,7 @@ private:
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  RCLCPP_INFO(this->get_logger(), "Starting subscriber");
-  rclcpp::spin(std::make_shared<ros2_interop::InstanceSubscriber>());
+  std::make_shared<ros2_interop::InstanceSubscriber>()->run();
   rclcpp::shutdown();
   return 0;
 }

@@ -66,7 +66,7 @@ export RMW_IMPLEMENTATION=rmw_connextdds
 Publisher:
 
 ```sh
-ros2 run instances instances_subscriber 5  # <5> is used as the key 'id' field value of data published
+ros2 run instances instances_publisher 3  # <3> is used as the key 'id' field value of data published
 ```
 
 Subscriber:
@@ -88,13 +88,13 @@ source /opt/rti.com/rti_connext_dds-7.3.0/resource/scripts/rtisetenv_x64Linux4gc
 Publisher:
 
 ```sh
-./Instances_publisher 5  # <5> is used as the key 'id' field value of data published
+./Instance_publisher 4  # <4> is used as the key 'id' field value of data published
 ```
 
 Subscriber:
 
 ```sh
-./Instances_subscriber
+./Instance_subscriber
 ```
 
 ## Features
@@ -102,6 +102,13 @@ Subscriber:
 ### Keys & Instances
 
 ROS2 supports annotating datatype files as key fields starting in Kilted.
+
+By using TRANSIENT_LOCAL Durability and KEEP_LAST History Qos with a depth of 1, this feature can be highlighted.
+
+1. Start 2 publisher apps with unique ids.
+2. Publish any number of messages from both publisher apps.
+3. Start 1 (or more) subscriber apps.
+4. See that the subscriber receives only the last message from each unique id (despite both publishers writing to the same topic).
 
 See:
 

@@ -30,7 +30,7 @@ class InstancePublisher : public rclcpp::Node
 public:
 
   explicit InstancePublisher(int id = 0)
-  : Node("instance_publisher")
+  : Node("instance_publisher"), id_(id)
   {
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
     pub_ = this->create_publisher<instances::msg::Instance>(
@@ -40,6 +40,9 @@ public:
 
   void run()
   {
+    RCLCPP_INFO(this->get_logger(), "Starting"
+      " publisher with id %d", id_);
+
     std::string user_input;
     while (rclcpp::ok()) {
       std::cout << "> ";
@@ -76,7 +79,7 @@ public:
   }
 
 private:
-  uint16_t id_{0};
+  uint16_t id_;
   rclcpp::Publisher<instances::msg::Instance>::SharedPtr pub_;
   uint32_t count_{0};
 };
@@ -90,7 +93,6 @@ int main(int argc, char * argv[])
   if (argc > 1) {
     id = std::atoi(argv[1]);
   }
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Starting publisher with id %d", id);
   std::make_shared<ros2_interop::InstancePublisher>(id)->run();
   rclcpp::shutdown();
   return 0;
