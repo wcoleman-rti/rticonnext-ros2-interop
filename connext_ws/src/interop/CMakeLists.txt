@@ -10,7 +10,7 @@ list(APPEND CMAKE_MODULE_PATH
 
 # Find the RTI Connext libraries
 find_package(RTIConnextDDS
-    "7.3.0"
+    "6.0.1"
     REQUIRED
     COMPONENTS
         core
@@ -27,12 +27,13 @@ endif()
 # Generate the sources for the types
 connextdds_rtiddsgen_run(
     IDL_FILE
-        "${CMAKE_CURRENT_SOURCE_DIR}/msg/Instance.idl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/msg/Interop.idl"
     OUTPUT_DIRECTORY
         "${CMAKE_CURRENT_BINARY_DIR}/msg"
     LANG C++11
     EXTRA_ARGS
         ${EXTRA_RTIDDSGEN_ARGS}
+        -ppOption -P
 )
 
 # -----------------------------------------------
@@ -40,20 +41,20 @@ connextdds_rtiddsgen_run(
 
 # Create an object library for the generated sources
 add_library(
-    Instance_types 
+    Interop_types 
     OBJECT
-        "${Instance_CXX11_GENERATED_SOURCES}"
+        "${Interop_CXX11_GENERATED_SOURCES}"
 )
 
 target_link_libraries(
-    Instance_types
+    Interop_types
     PUBLIC
         RTIConnextDDS::cpp2_api
         ${EXTRA_RTICONNEXT_LIBS}
 )
 
 target_include_directories(
-    Instance_types
+    Interop_types
     PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>"
 )
@@ -63,26 +64,26 @@ target_include_directories(
 
 # Create the executables
 add_executable(
-    Instance_publisher
-    "${CMAKE_CURRENT_SOURCE_DIR}/Instance_publisher.cxx"
+    Interop_publisher
+    "${CMAKE_CURRENT_SOURCE_DIR}/interop_publisher.cxx"
 )
 
 add_executable(
-    Instance_subscriber
-    "${CMAKE_CURRENT_SOURCE_DIR}/Instance_subscriber.cxx"
+    Interop_subscriber
+    "${CMAKE_CURRENT_SOURCE_DIR}/interop_subscriber.cxx"
 )
 
 # Link against the RTI Connext libraries
 target_link_libraries(
-    Instance_publisher
+    Interop_publisher
     PRIVATE
-        Instance_types
+        Interop_types
 )
 
 target_link_libraries(
-    Instance_subscriber
+    Interop_subscriber
     PRIVATE
-        Instance_types
+        Interop_types
 )
 
 # ---------------------------------------------------
@@ -90,8 +91,8 @@ target_link_libraries(
 
 install(
     TARGETS
-        Instance_publisher
-        Instance_subscriber
+        Interop_publisher
+        Interop_subscriber
     RUNTIME DESTINATION bin
 )
 

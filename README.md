@@ -4,25 +4,25 @@
 
 This set of examples demonstrates interoperability between:
 
-1. ROS Kilted pub/sub apps using rmw_connextdds
-2. RTI Connext 7.3.0 pub/sub apps
+1. ROS Humble pub/sub apps using rmw_connextdds
+2. RTI Connext 7.3.0+ pub/sub apps
 
 It also demonstrates features that have interoperability considerations such as:
 
-1. [Keys & Instances](#keys--instances)
-2. [Zero Copy over SHMEM](#zero-copy)
+1. [Zero Copy over SHMEM](#zero-copy)
 
 ## Requirements
 
-1. [ROS2 Kilted](https://docs.ros.org/en/kilted/Installation/Ubuntu-Install-Debs.html#install-ros-2)
-2. [RTI Connext 7.3.0](https://docs.ros.org/en/kilted/Installation/RMW-Implementations/DDS-Implementations/Working-with-RTI-Connext-DDS.html#rti-connext-dds)
+1. [ROS2 Humble](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html#install-ros-2)
+    * [RTI Connext 6.0.1](https://docs.ros.org/en/humble/Installation/RMW-Implementations/DDS-Implementations/Working-with-RTI-Connext-DDS.html#rti-connext-dds) is the default RMW RTI provides for this ROS2 release.
+2. [RTI Connext 7.3.0+](https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/debian_packages/install.html)
 
 ## Build Apps
 
 ### ROS2 Build Apps
 
 ```sh
-source /opt/ros/kilted/setup.sh
+source /opt/ros/humble/setup.sh
 cd ros2_ws
 colcon build --symlink-install
 ```
@@ -59,20 +59,20 @@ cd ros2_ws
 source install/setup.bash
 
 # Use rmw_connextdds and setup shared Connext libs
-source /opt/rti.com/rti_connext_dds-7.3.0/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
+source /opt/rti.com/rti_connext_dds-6.0.1/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
 export RMW_IMPLEMENTATION=rmw_connextdds
 ```
 
 Publisher:
 
 ```sh
-ros2 run instances instances_publisher 3  # <3> is used as the key 'id' field value of data published
+ros2 run interop interop_publisher 3  # <3> is used as the key 'id' field value of data published
 ```
 
 Subscriber:
 
 ```sh
-ros2 run instances instances_subscriber
+ros2 run interop interop_subscriber
 ```
 
 ### Connext Run Apps
@@ -88,31 +88,16 @@ source /opt/rti.com/rti_connext_dds-7.3.0/resource/scripts/rtisetenv_x64Linux4gc
 Publisher:
 
 ```sh
-./Instance_publisher 4  # <4> is used as the key 'id' field value of data published
+./Interop_publisher 4  # <4> is used as the key 'id' field value of data published
 ```
 
 Subscriber:
 
 ```sh
-./Instance_subscriber
+./Interop_subscriber
 ```
 
 ## Features
-
-### Keys & Instances
-
-ROS2 supports annotating datatype files as key fields starting in Kilted.
-
-By using TRANSIENT_LOCAL Durability and KEEP_LAST History Qos with a depth of 1, this feature can be highlighted.
-
-1. Start 2 publisher apps with unique ids.
-2. Publish any number of messages from both publisher apps.
-3. Start 1 (or more) subscriber apps.
-4. See that the subscriber receives only the last message from each unique id (despite both publishers writing to the same topic).
-
-See:
-
-* [ROS2: Topic Keys Tutorial](https://docs.ros.org/en/kilted/Tutorials/Advanced/Topic-Keys/Topic-Keys-Tutorial.html#topic-keys-tutorial)
 
 ### Zero Copy
 
@@ -121,7 +106,7 @@ However it can interoperate - it just means that a ZC Connext writer will write 
 
 See:
 
-* [Connext: Zero Copy over SHMEM](https://community.rti.com/static/documentation/connext-dds/7.3.0/doc/manuals/connext_dds_professional/users_manual/users_manual/SendingLDZeroCopy.htm)
+* [Connext: Zero Copy over SHMEM](https://community.rti.com/static/documentation/connext-dds/7.3.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/SendingLDZeroCopyUsing.htm)
 
 #### Expected interoperability results
 

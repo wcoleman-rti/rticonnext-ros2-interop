@@ -18,7 +18,7 @@
 #include <csignal>
 #include <atomic>
 
-#include <instances/msg/Instance.hpp>
+#include <interop/msg/Interop.hpp>
 #include <dds/dds.hpp>
 #include <rti/rti.hpp>
 
@@ -36,23 +36,23 @@ inline void setup_signal_handlers()
     signal(SIGTERM, stop_handler);
 }
 
-namespace ros2_interop
+namespace connext
 {
 
-class InstancePublisher
+class InteropPublisher
 {
 public:
 
-  explicit InstancePublisher(int id = 0, unsigned int domain_id = 0) 
+  explicit InteropPublisher(int id = 0, unsigned int domain_id = 0) 
   : id_(id)
   {
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-    dds::domain::DomainParticipant participant(domain_id);
-    dds::topic::Topic< ::instances::msg::Instance> topic(participant, "rt/instances", "instances::msg::dds_::Instance_");
-    pub_ = dds::pub::DataWriter< ::instances::msg::Instance>(
+    dds::domain::DomainParticipant participant(domain_id, dds::core::QosProvider::Default().participant_qos("QosLibrary::DefaultQos"));
+    dds::topic::Topic< ::interop::msg::Interop> topic(participant, "rt/interop", "interop::msg::dds_::InteropMsg_");
+    pub_ = dds::pub::DataWriter< ::interop::msg::Interop>(
         topic, 
         dds::core::QosProvider::Default().datawriter_qos(
-            rti::core::builtin_profiles::qos_lib::generic_keep_last_reliable_transient_local()));
+          "QosLibrary::DefaultQos"));
   }
 
   void run()
@@ -73,15 +73,15 @@ public:
           if (!user_input.empty())
           {
             #ifdef USE_SHMEM_REF
-            auto instance = pub_->get_loan();
+            auto interop_msg = pub_->get_loan();
             #else
-            auto instance = std::make_unique<instances::msg::Instance>();
+            auto interop_msg = std::make_unique<interop::msg::Interop>();
             #endif
-            instance->id(id_);
-            strncpy(reinterpret_cast<char*>(instance->msg().data()), user_input.c_str(), sizeof(instance->msg()) - 1);
-            instance->msg().data()[sizeof(instance->msg()) - 1] = '\0'; // Ensure null termination
-            fprintf(stdout, "Publishing: [id: %ld] %s\n", instance->id(), instance->msg().data());
-            pub_->write(*instance);
+            interop_msg->id(id_);
+            strncpy(reinterpret_cast<char*>(interop_msg->msg().data()), user_input.c_str(), sizeof(interop_msg->msg()) - 1);
+            interop_msg->msg().data()[sizeof(interop_msg->msg()) - 1] = '\0'; // Ensure null termination
+            fprintf(stdout, "Publishing: [id: %ld] %s\n", interop_msg->id(), interop_msg->msg().data());
+            pub_->write(*interop_msg);
             count_++;
           }
       }
@@ -95,18 +95,18 @@ public:
     }
   }
 
-  ~InstancePublisher()
+  ~InteropPublisher()
   {
     fprintf(stdout, "Finalized publisher with id %d, published %d msgs\n", id_, count_);
   }
 
 private:
   uint16_t id_{0};
-  dds::pub::DataWriter< ::instances::msg::Instance> pub_ = dds::core::null;
+  dds::pub::DataWriter< ::interop::msg::Interop> pub_ = dds::core::null;
   uint32_t count_{0};
 };
 
-} // namespace ros2_interop
+} // namespace connext
 
 int main(int argc, char * argv[])
 {
@@ -117,7 +117,7 @@ int main(int argc, char * argv[])
   }
   rti::util::network_capture::enable();
   rti::util::network_capture::start("capture");
-  std::make_shared<ros2_interop::InstancePublisher>(id)->run();
+  std::make_shared<connext::InteropPublisher>(id)->run();
   rti::util::network_capture::stop();
   rti::util::network_capture::disable();
   dds::domain::DomainParticipant::finalize_participant_factory();

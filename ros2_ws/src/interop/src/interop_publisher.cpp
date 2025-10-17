@@ -19,23 +19,23 @@
 #include <utility>
 #include <iostream>
 
-#include <instances/msg/Instance.hpp>
+#include <interop/msg/Interop.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-namespace ros2_interop
+namespace ros2
 {
 
-class InstancePublisher : public rclcpp::Node
+class InteropPublisher : public rclcpp::Node
 {
 public:
 
-  explicit InstancePublisher(int id = 0)
-  : Node("instance_publisher"), id_(id)
+  explicit InteropPublisher(int id = 0)
+  : Node("interop_publisher"), id_(id)
   {
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-    pub_ = this->create_publisher<instances::msg::Instance>(
-        "instances",
-        rclcpp::QoS(rclcpp::KeepLast(1)).reliable().transient_local());
+    pub_ = this->create_publisher<interop::msg::Interop>(
+        "interop",
+        rclcpp::QoS(rclcpp::KeepLast(1)).best_effort());
   }
 
   void run()
@@ -52,12 +52,12 @@ public:
           // Only publish if the input is not empty
           if (!user_input.empty())
           {
-            auto instance = std::make_unique<instances::msg::Instance>();
-            instance->id = id_;
-            strncpy(reinterpret_cast<char*>(instance->msg.data()), user_input.c_str(), sizeof(instance->msg) - 1);
-            instance->msg[sizeof(instance->msg) - 1] = '\0'; // Ensure null termination
-            RCLCPP_INFO(this->get_logger(), "Publishing: [id: %ld] %s", instance->id, instance->msg.data());
-            pub_->publish(std::move(instance));
+            auto interop_msg = std::make_unique<interop::msg::Interop>();
+            interop_msg->id = id_;
+            strncpy(reinterpret_cast<char*>(interop_msg->msg.data()), user_input.c_str(), sizeof(interop_msg->msg) - 1);
+            interop_msg->msg[sizeof(interop_msg->msg) - 1] = '\0'; // Ensure null termination
+            RCLCPP_INFO(this->get_logger(), "Publishing: [id: %ld] %s", interop_msg->id, interop_msg->msg.data());
+            pub_->publish(std::move(interop_msg));
             count_++;
           }
       }
@@ -73,18 +73,18 @@ public:
     }
   }
 
-  ~InstancePublisher() override
+  ~InteropPublisher() override
   {
     RCLCPP_INFO(this->get_logger(), "Finalized publisher with id %d, published %d msgs", id_, count_);
   }
 
 private:
   uint16_t id_;
-  rclcpp::Publisher<instances::msg::Instance>::SharedPtr pub_;
+  rclcpp::Publisher<interop::msg::Interop>::SharedPtr pub_;
   uint32_t count_{0};
 };
 
-} // namespace ros2_interop
+} // namespace ros2
 
 int main(int argc, char * argv[])
 {
@@ -93,7 +93,7 @@ int main(int argc, char * argv[])
   if (argc > 1) {
     id = std::atoi(argv[1]);
   }
-  std::make_shared<ros2_interop::InstancePublisher>(id)->run();
+  std::make_shared<ros2::InteropPublisher>(id)->run();
   rclcpp::shutdown();
   return 0;
 }

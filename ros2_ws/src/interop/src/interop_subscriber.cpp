@@ -15,30 +15,30 @@
 
 #include <cstdio>
 
-#include <instances/msg/Instance.hpp>
+#include <interop/msg/Interop.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-namespace ros2_interop
+namespace ros2
 {
 
-class InstanceSubscriber : public rclcpp::Node
+class InteropSubscriber : public rclcpp::Node
 {
 public:
 
-  explicit InstanceSubscriber()
-  : Node("instance_subscriber")
+  explicit InteropSubscriber()
+  : Node("interop_subscriber")
   {
     // Create a callback function for when messages are received.
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
     auto callback =
-      [this](instances::msg::Instance::ConstSharedPtr msg) -> void
+      [this](interop::msg::Interop::ConstSharedPtr msg) -> void
       {
         RCLCPP_INFO(this->get_logger(), "Received: [id: %ld] %s",msg->id, msg->msg.data());
         count_++;
       };
 
-    sub_ = create_subscription<instances::msg::Instance>("instances",
-        rclcpp::QoS(rclcpp::KeepLast(1)).reliable().transient_local(),
+    sub_ = create_subscription<interop::msg::Interop>("interop",
+        rclcpp::QoS(rclcpp::KeepLast(100)).best_effort(),
         callback);
   }
 
@@ -52,24 +52,24 @@ public:
     }
   }
 
-  ~InstanceSubscriber() override
+  ~InteropSubscriber() override
   {
     RCLCPP_INFO(this->get_logger(), "Finalized subscriber, received %d msgs", count_);
   }
 
 private:
-  rclcpp::Subscription<instances::msg::Instance>::SharedPtr sub_;
+  rclcpp::Subscription<interop::msg::Interop>::SharedPtr sub_;
   uint32_t count_{0};
 };
 
-} // namespace ros2_interop
+} // namespace ros2
 
 
 
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  std::make_shared<ros2_interop::InstanceSubscriber>()->run();
+  std::make_shared<ros2::InteropSubscriber>()->run();
   rclcpp::shutdown();
   return 0;
 }

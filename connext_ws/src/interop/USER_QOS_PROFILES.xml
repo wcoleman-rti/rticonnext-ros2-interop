@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
 Description
-XML QoS Profile for Instance
+XML QoS Profile for Interop
 
 (c) Copyright, Real-Time Innovations, 2012.  All rights reserved.
 RTI grants Licensee a license to use, modify, compile, and create derivative
@@ -54,54 +54,30 @@ XML" chapter in the RTI Connext DDS Core Libraries User's Manual.
 
         A QoS library is a named set of QoS profiles.
     -->
-    <qos_library name="Instance_Library">
+    <qos_library name="QosLibrary">
 
         <!-- QoS profile used to configure reliable communication between the DataWriter 
              and DataReader created in the example code.
 
              A QoS profile groups a set of related QoS.
         -->
-        <qos_profile name="Instance_Profile" base_name="BuiltinQosLib::Generic.KeepLastReliable.TransientLocal" is_default_qos="true">
-            <!-- QoS used to configure the data writer created in the example code -->                
-            <datawriter_qos>
-                <publication_name>
-                    <name>InstanceDataWriter</name>
-                </publication_name>
-            </datawriter_qos>
-
-            <!-- QoS used to configure the data reader created in the example code -->                
-            <datareader_qos>
-                <subscription_name>
-                    <name>InstanceDataReader</name>
-                </subscription_name>
-            </datareader_qos>
+        <qos_profile name="DefaultQos" base_name="BuiltinQosLib::Generic.BestEffort" is_default_qos="true">
             <domain_participant_qos>
-                <!--
-                The participant name, if it is set, will be displayed in the
-                RTI tools, making it easier for you to tell one
-                application from another when you're debugging.
-                -->
-                <participant_name>
-                    <name>InstanceParticipant</name>
-                    <role_name>InstanceParticipantRole</role_name>
-                </participant_name>
-
-                <!-- The initial peers list for discovery can be specified if needed:
-                <discovery>
-                    <initial_peers>
-                        <element>builtin.udpv4://239.255.0.1</element>
-                        <element>builtin.udpv4://127.0.0.1</element>
-                        <element>shmem://</element>
-                    </initial_peers>
-                </discovery>
-                -->
-                <!-- The allowed transports can be specified if needed:
-                <transport_builtin>
-                    <mask>UDPV4|SHMEM</mask>
-                </transport_builtin>
-                -->
-
             </domain_participant_qos>
+
+            <datawriter_qos>
+                <history>
+                    <kind>KEEP_LAST_HISTORY_QOS</kind>
+                    <depth>1</depth>
+                </history>
+            </datawriter_qos>
+     
+            <datareader_qos>
+                <history>
+                    <kind>KEEP_LAST_HISTORY_QOS</kind>
+                    <depth>100</depth>
+                </history>
+            </datareader_qos>
         </qos_profile>
 
     </qos_library>

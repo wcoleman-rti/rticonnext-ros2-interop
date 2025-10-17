@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(instances)
+project(interop)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -13,7 +13,7 @@ find_package(rosidl_default_generators REQUIRED)
 
 # Generate message
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/Instance.idl"
+  "msg/Interop.idl"
 )
 
 ament_export_dependencies(rosidl_default_runtime)
@@ -22,35 +22,35 @@ rosidl_get_typesupport_target(cpp_typesupport_target
   ${PROJECT_NAME} rosidl_typesupport_cpp)
 
 # Prepare executables
-add_executable(instances_publisher src/instances_publisher.cpp)
-add_executable(instances_subscriber src/instances_subscriber.cpp)
+add_executable(interop_publisher src/interop_publisher.cpp)
+add_executable(interop_subscriber src/interop_subscriber.cpp)
 
 # Include headers
-target_include_directories(instances_publisher 
+target_include_directories(interop_publisher 
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
-target_include_directories(instances_subscriber
+target_include_directories(interop_subscriber
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 
 # Link against the generated typesupport library
-target_link_libraries(instances_publisher
+target_link_libraries(interop_publisher
     "${cpp_typesupport_target}" 
     rclcpp::rclcpp)
-target_link_libraries(instances_subscriber
+target_link_libraries(interop_subscriber
    "${cpp_typesupport_target}" 
    rclcpp::rclcpp)
 
 # Require C99 and C++17
-target_compile_features(instances_publisher PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-target_compile_features(instances_subscriber PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+target_compile_features(interop_publisher PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+target_compile_features(interop_subscriber PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
 # Install executables
 install(TARGETS 
-  instances_publisher
-  instances_subscriber
+  interop_publisher
+  interop_subscriber
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
