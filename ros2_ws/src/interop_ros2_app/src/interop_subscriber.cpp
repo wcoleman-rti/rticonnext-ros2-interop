@@ -15,7 +15,7 @@
 
 #include <cstdio>
 
-#include <interop/msg/Interop.hpp>
+#include <interop_interface/msg/Interop.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 namespace ros2
@@ -31,13 +31,13 @@ public:
     // Create a callback function for when messages are received.
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
     auto callback =
-      [this](interop::msg::Interop::ConstSharedPtr msg) -> void
+      [this](interop_interface::msg::Interop::ConstSharedPtr msg) -> void
       {
         RCLCPP_INFO(this->get_logger(), "Received: [id: %ld] %s",msg->id, msg->msg.data());
         count_++;
       };
 
-    sub_ = create_subscription<interop::msg::Interop>("interop",
+    sub_ = create_subscription<interop_interface::msg::Interop>("interop",
         rclcpp::QoS(rclcpp::KeepLast(100)).best_effort(),
         callback);
   }
@@ -58,7 +58,7 @@ public:
   }
 
 private:
-  rclcpp::Subscription<interop::msg::Interop>::SharedPtr sub_;
+  rclcpp::Subscription<interop_interface::msg::Interop>::SharedPtr sub_;
   uint32_t count_{0};
 };
 

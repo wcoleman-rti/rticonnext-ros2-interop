@@ -19,7 +19,7 @@
 #include <utility>
 #include <iostream>
 
-#include <interop/msg/Interop.hpp>
+#include <interop_interface/msg/Interop.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 namespace ros2
@@ -33,7 +33,7 @@ public:
   : Node("interop_publisher"), id_(id)
   {
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-    pub_ = this->create_publisher<interop::msg::Interop>(
+    pub_ = this->create_publisher<interop_interface::msg::Interop>(
         "interop",
         rclcpp::QoS(rclcpp::KeepLast(1)).best_effort());
   }
@@ -52,7 +52,7 @@ public:
           // Only publish if the input is not empty
           if (!user_input.empty())
           {
-            auto interop_msg = std::make_unique<interop::msg::Interop>();
+            auto interop_msg = std::make_unique<interop_interface::msg::Interop>();
             interop_msg->id = id_;
             strncpy(reinterpret_cast<char*>(interop_msg->msg.data()), user_input.c_str(), sizeof(interop_msg->msg) - 1);
             interop_msg->msg[sizeof(interop_msg->msg) - 1] = '\0'; // Ensure null termination
@@ -80,7 +80,7 @@ public:
 
 private:
   uint16_t id_;
-  rclcpp::Publisher<interop::msg::Interop>::SharedPtr pub_;
+  rclcpp::Publisher<interop_interface::msg::Interop>::SharedPtr pub_;
   uint32_t count_{0};
 };
 

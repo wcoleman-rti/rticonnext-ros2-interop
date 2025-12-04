@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.20)
-project(interop)
+cmake_minimum_required(VERSION 3.8)
+project(interop_ros2_app)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -8,18 +8,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(rclcpp_components REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
-
-# Generate message
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/Interop.idl"
-)
-
-ament_export_dependencies(rosidl_default_runtime)
-
-rosidl_get_typesupport_target(cpp_typesupport_target
-  ${PROJECT_NAME} rosidl_typesupport_cpp)
+find_package(interop_interface REQUIRED)
 
 # Prepare executables
 add_executable(interop_publisher src/interop_publisher.cpp)
@@ -37,11 +26,17 @@ target_include_directories(interop_subscriber
 
 # Link against the generated typesupport library
 target_link_libraries(interop_publisher
-    "${cpp_typesupport_target}" 
+    interop_interface::rosidl_typesupport_cpp
     rclcpp::rclcpp)
 target_link_libraries(interop_subscriber
-   "${cpp_typesupport_target}" 
-   rclcpp::rclcpp)
+    interop_interface::rosidl_typesupport_cpp
+    rclcpp::rclcpp)
+# ament_target_dependencies(interop_publisher
+#     interop_interface
+#     rclcpp)
+# ament_target_dependencies(interop_subscriber
+#     interop_interface
+#     rclcpp)
 
 # Require C99 and C++17
 target_compile_features(interop_publisher PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17

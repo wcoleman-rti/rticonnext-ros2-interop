@@ -17,37 +17,18 @@ It also demonstrates features that have interoperability considerations such as:
     * [RTI Connext 6.0.1](https://docs.ros.org/en/humble/Installation/RMW-Implementations/DDS-Implementations/Working-with-RTI-Connext-DDS.html#rti-connext-dds) is the default RMW RTI provides for this ROS2 release.
 2. [RTI Connext 7.3.0+](https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/debian_packages/install.html)
 
-## Build Apps
+## Build
 
-### ROS2 Build Apps
+*Note: you should setup your RTI Connext build environment to be against the version the native connext app will link against, regardless of the version the ROS2 RMW app will use.*
 
 ```sh
 source /opt/ros/humble/setup.sh
+source /opt/rti.com/rti_connext_dds-7.3.0/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
 cd ros2_ws
 colcon build --symlink-install
 ```
 
-### Connext Build Apps
-
-```sh
-source /opt/rti.com/rti_connext_dds-7.3.0/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
-cd connext_ws
-cmake -B build
-cmake --build build
-cmake --install build
-```
-
-Optionally, to build the Connext apps to use Zero Copy (SHMEMREF):
-
-```sh
-source /opt/rti.com/rti_connext_dds-7.3.0/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
-cd connext_ws
-cmake -B build -DUSE_SHMEM_REF=1
-cmake --build build
-cmake --install build
-```
-
-## Run Apps
+## Run
 
 ### ROS2 Run Apps
 
@@ -61,18 +42,19 @@ source install/setup.bash
 # Use rmw_connextdds and setup shared Connext libs
 source /opt/rti.com/rti_connext_dds-6.0.1/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
 export RMW_IMPLEMENTATION=rmw_connextdds
+export NDDS_QOS_PROFILES=install/interop_interface/share/interop_interface/config/USER_QOS_PROFILES.xml
 ```
 
 Publisher:
 
 ```sh
-ros2 run interop interop_publisher 3  # <3> is used as the key 'id' field value of data published
+ros2 run interop_ros2_app interop_publisher 3  # <3> is used as the key 'id' field value of data published
 ```
 
 Subscriber:
 
 ```sh
-ros2 run interop interop_subscriber
+ros2 run interop_ros2_app interop_subscriber
 ```
 
 ### Connext Run Apps
@@ -80,21 +62,25 @@ ros2 run interop interop_subscriber
 Common environment:
 
 ```sh
+# Setup the ROS2 environment
+cd ros2_ws
+source install/setup.bash
+
 # Setup shared Connext libs
-cd connext_ws/bin
 source /opt/rti.com/rti_connext_dds-7.3.0/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
+export NDDS_QOS_PROFILES=install/interop_interface/share/interop_interface/config/USER_QOS_PROFILES.xml
 ```
 
 Publisher:
 
 ```sh
-./Interop_publisher 4  # <4> is used as the key 'id' field value of data published
+ros2 run interop_connext_app interop_publisher 4  # <4> is used as the key 'id' field value of data published
 ```
 
 Subscriber:
 
 ```sh
-./Interop_subscriber
+ros2 run interop_connext_app interop_subscriber
 ```
 
 ## Features
@@ -110,8 +96,7 @@ See:
 
 #### Expected interoperability results
 
-|                         | Connext Pub (Zero Copy) | Connext Pub (Plain) | ROS2 Pub |
-|-------------------------|-------------------------|---------------------|----------|
-| Connext Sub (Zero Copy) | `SHMEMREF`              | `PLAIN`             | `PLAIN`  |
-| Connext Sub (Plain)     | `PLAIN`                 | `PLAIN`             | `PLAIN`  |
-| ROS2 Sub                | `PLAIN`                 | `PLAIN`             | `PLAIN`  |
+|                         | Connext Pub (Zero Copy) | ROS2 Pub |
+|-------------------------|-------------------------|----------|
+| Connext Sub (Zero Copy) | `SHMEMREF`              | `PLAIN`  |
+| ROS2 Sub                | `PLAIN`                 | `PLAIN`  |

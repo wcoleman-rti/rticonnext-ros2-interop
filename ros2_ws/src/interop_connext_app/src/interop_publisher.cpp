@@ -18,7 +18,7 @@
 #include <csignal>
 #include <atomic>
 
-#include <interop/msg/Interop.hpp>
+#include <interop_interface/msg/Interop.hpp>
 #include <dds/dds.hpp>
 #include <rti/rti.hpp>
 
@@ -48,8 +48,8 @@ public:
   {
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
     dds::domain::DomainParticipant participant(domain_id, dds::core::QosProvider::Default().participant_qos("QosLibrary::DefaultQos"));
-    dds::topic::Topic< ::interop::msg::Interop> topic(participant, "rt/interop", "interop::msg::dds_::InteropMsg_");
-    pub_ = dds::pub::DataWriter< ::interop::msg::Interop>(
+    dds::topic::Topic<interop_interface::msg::Interop> topic(participant, "rt/interop", "interop_interface::msg::dds_::InteropMsg_");
+    pub_ = dds::pub::DataWriter<interop_interface::msg::Interop>(
         topic, 
         dds::core::QosProvider::Default().datawriter_qos(
           "QosLibrary::DefaultQos"));
@@ -58,9 +58,7 @@ public:
   void run()
   {
     fprintf(stdout, "Starting" 
-        #ifdef USE_SHMEM_REF
         " (SHMEM_REF)"
-        #endif
         " publisher with id %d\n", id_);
 
     std::string user_input;
@@ -72,11 +70,7 @@ public:
           // Only publish if the input is not empty
           if (!user_input.empty())
           {
-            #ifdef USE_SHMEM_REF
             auto interop_msg = pub_->get_loan();
-            #else
-            auto interop_msg = std::make_unique<interop::msg::Interop>();
-            #endif
             interop_msg->id(id_);
             strncpy(reinterpret_cast<char*>(interop_msg->msg().data()), user_input.c_str(), sizeof(interop_msg->msg()) - 1);
             interop_msg->msg().data()[sizeof(interop_msg->msg()) - 1] = '\0'; // Ensure null termination
@@ -102,7 +96,7 @@ public:
 
 private:
   uint16_t id_{0};
-  dds::pub::DataWriter< ::interop::msg::Interop> pub_ = dds::core::null;
+  dds::pub::DataWriter<interop_interface::msg::Interop> pub_ = dds::core::null;
   uint32_t count_{0};
 };
 
@@ -121,5 +115,6 @@ int main(int argc, char * argv[])
   rti::util::network_capture::stop();
   rti::util::network_capture::disable();
   dds::domain::DomainParticipant::finalize_participant_factory();
+  printf("Shutdown complete.\n");
   return 0;
 }

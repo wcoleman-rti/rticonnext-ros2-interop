@@ -1,13 +1,11 @@
 // generated from rosidl_adapter/resource/msg.idl.em
-// with input from interop/msg/Interop.msg
+// with input from interop/msg/Interop2.msg
 // generated code does not contain a copyright notice
 
 
-module interop {
+module interop_interface {
   module msg {
-    #ifdef USE_SHMEM_REF
     @transfer_mode(SHMEM_REF)
-    #endif
     struct Interop {
       int64 id;
       char msg[256];
