@@ -100,3 +100,33 @@ See:
 |-------------------------|-------------------------|----------|
 | Connext Sub (Zero Copy) | `SHMEMREF`              | `PLAIN`  |
 | ROS2 Sub                | `PLAIN`                 | `PLAIN`  |
+
+## Issues
+
+1. Ament build warning for `interop_interface` package.
+
+    ```none
+    CMake Warning at <...>/ros2_ws/install/interop_interface/share/interop_interface/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake:18 (message):
+        Package 'interop_interface' exports the typesupport target
+        'interop_interface::interop_interface__rosidl_typesupport_cpp' which
+        doesn't exist
+    Call Stack (most recent call first):
+        <...>/ros2_ws/install/interop_interface/share/interop_interface/cmake/interop_interfaceConfig.cmake:41 (include)
+        CMakeLists.txt:11 (find_package)
+    ```
+
+    The build succeeds and the `interop_ros2_app` package builds successfully, linking against the `interop_interface::rosidl_typesupport_cpp` exported target from this package.
+
+    This should be reviewed further.
+
+2. Double free for `interop_connext_app` applications on shutdown.
+
+    ```none
+    Shutdown complete.
+    double free or corruption (fasttop)
+    [ros2run]: Aborted
+    ```
+
+    This may have something to do with a dynamic linking issue if both 7.3.0 (from native connext build of `interop_interface`) and 6.0.1 (from `rmw_connextdds`) are both being linked.
+
+    This should be reviewed further.
