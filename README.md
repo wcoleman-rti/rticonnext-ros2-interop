@@ -83,6 +83,8 @@ source <path/to/rti_connext_dds-#-#-#>/resource/scripts/rtisetenv_<platform>.bas
 
 This package implements an extension to the `rosidl_generate_idl_interfaces` extension point to generate code for RTI Connext Modern C++ api.
 
+This package mirrors the implementation of [rosidl_typesupport_cpp](https://github.com/ros2/rosidl_typesupport/tree/rolling/rosidl_typesupport_cpp).
+
 By finding this package with `find_package(connextidl_typesupport_cpp2)`, a single call to `rosidl_generate_interfaces()`
 will generate code for both default rosidl generators as well as RTI Code Generator.
 
