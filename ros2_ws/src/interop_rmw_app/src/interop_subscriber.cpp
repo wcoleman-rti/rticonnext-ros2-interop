@@ -14,10 +14,26 @@
 // limitations under the License.
 
 #include <cstdio>
+
+#include <atomic>
+#include <csignal>
+
 #include <rclcpp/rclcpp.hpp>
 
 #include <interop_interface/msg/interop.hpp>  // rosidl
 #include <interop_interface/msg/status.hpp>   // rosidl
+
+std::atomic<bool> shutdown_requested{false};
+
+inline void setup_signal_handlers()
+{
+  auto stop_handler = [](int) {
+      shutdown_requested.store(true);
+      fprintf(stdout, "preparing to shut down...\n");
+  };
+  signal(SIGINT, stop_handler);
+  signal(SIGTERM, stop_handler);
+}
 
 namespace rmw
 {
@@ -72,8 +88,12 @@ private:
 
 int main(int argc, char * argv[])
 {
+  setup_signal_handlers();
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<rmw::InteropSubscriber>());
+  auto app = std::make_shared<rmw::InteropSubscriber>();
+  while (!shutdown_requested.load() && rclcpp::ok()) {
+    rclcpp::spin_some(app);
+  }
   rclcpp::shutdown();
   printf("Shutdown complete.\n");
   return 0;

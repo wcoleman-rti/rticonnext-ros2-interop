@@ -20,6 +20,7 @@
 #include <iostream>
 #include <thread>
 #include <atomic>
+#include <csignal>
 
 #include <rclcpp/rclcpp.hpp>
 #include <dds/dds.hpp>
@@ -27,6 +28,18 @@
 
 #include <interop_interface/msg/interop.hpp>          // rosidl
 #include <connext/interop_interface/msg/Status.hpp>   // connextidl
+
+std::atomic<bool> shutdown_requested{false};
+
+inline void setup_signal_handlers()
+{
+  auto stop_handler = [](int) {
+      shutdown_requested.store(true);
+      fprintf(stdout, "preparing to shut down...\n");
+  };
+  signal(SIGINT, stop_handler);
+  signal(SIGTERM, stop_handler);
+}
 
 namespace mixed
 {
@@ -62,7 +75,7 @@ public:
       " publisher with id %d", id_);
 
     std::string user_input;
-    while (rclcpp::ok() && !stop_thread_.load()) {
+    while (!stop_thread_.load() && rclcpp::ok()) {
       std::cout << "> ";
       // Use std::getline to read the entire line, including spaces, until Enter is pressed
       if (std::getline(std::cin, user_input))
@@ -91,6 +104,7 @@ public:
       {
           // Handle EOF (e.g., Ctrl+D or end of pipe)
           RCLCPP_INFO(this->get_logger(), "Input stream closed. Exiting...");
+          shutdown_requested.store(true);
           break;
       }
     }
@@ -119,12 +133,16 @@ private:
 
 int main(int argc, char * argv[])
 {
+  setup_signal_handlers();
   rclcpp::init(argc, argv);
   int id = 0;
   if (argc > 1) {
     id = std::atoi(argv[1]);
   }
-  rclcpp::spin(std::make_shared<mixed::InteropPublisher>(id));
+  auto app = std::make_shared<mixed::InteropPublisher>(id);
+  while (!shutdown_requested.load() && rclcpp::ok()) {
+    rclcpp::spin_some(app);
+  }
   rclcpp::shutdown();
   printf("Shutdown complete.\n");
   return 0;

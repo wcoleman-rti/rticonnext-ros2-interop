@@ -20,11 +20,24 @@
 #include <iostream>
 #include <thread>
 #include <atomic>
+#include <csignal>
 
 #include <rclcpp/rclcpp.hpp>
 
 #include <interop_interface/msg/Interop.hpp>    // rosidl
 #include <interop_interface/msg/Status.hpp>     // rosidl
+
+std::atomic<bool> shutdown_requested{false};
+
+inline void setup_signal_handlers()
+{
+  auto stop_handler = [](int) {
+      shutdown_requested.store(true);
+      fprintf(stdout, "preparing to shut down...\n");
+  };
+  signal(SIGINT, stop_handler);
+  signal(SIGTERM, stop_handler);
+}
 
 namespace rmw
 {
@@ -83,6 +96,7 @@ public:
       {
           // Handle EOF (e.g., Ctrl+D or end of pipe)
           RCLCPP_INFO(this->get_logger(), "Input stream closed. Exiting...");
+          shutdown_requested.store(true);
           break;
       }
     }
@@ -111,12 +125,17 @@ private:
 
 int main(int argc, char * argv[])
 {
+  setup_signal_handlers();
   rclcpp::init(argc, argv);
   int id = 0;
   if (argc > 1) {
     id = std::atoi(argv[1]);
   }
-  rclcpp::spin(std::make_shared<rmw::InteropPublisher>(id));
+  auto app = std::make_shared<rmw::InteropPublisher>(id);
+  while (!shutdown_requested.load() && rclcpp::ok()) {
+    rclcpp::spin_some(app);
+  }
   rclcpp::shutdown();
+  printf("Shutdown complete.\n");
   return 0;
 }

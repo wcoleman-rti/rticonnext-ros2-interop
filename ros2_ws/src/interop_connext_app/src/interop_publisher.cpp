@@ -65,10 +65,6 @@ public:
     participant.enable();
 
     input_thread_ = std::thread(&InteropPublisher::run, this);
-
-    while (!shutdown_requested.load()) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
   }
 
   void run()
@@ -140,7 +136,11 @@ int main(int argc, char * argv[])
   if (argc > 1) {
     id = std::atoi(argv[1]);
   }
-  std::make_shared<connext::InteropPublisher>(id);
+  auto app = std::make_shared<connext::InteropPublisher>(id);
+  while (!shutdown_requested.load()) {
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+  app.reset();
   printf("Shutdown complete.\n");
   return 0;
 }

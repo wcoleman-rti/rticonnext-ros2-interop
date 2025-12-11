@@ -85,10 +85,6 @@ public:
 
     fprintf(stdout, "Starting subscriber\n");
     participant.enable();
-
-    while (!shutdown_requested.load()) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
   }
 
   ~InteropSubscriber()
@@ -112,7 +108,11 @@ int main(int argc, char * argv[])
   setup_signal_handlers();
   (void)argc;
   (void)argv;
-  std::make_shared<connext::InteropSubscriber>();
+  auto app = std::make_shared<connext::InteropSubscriber>();
+  while (!shutdown_requested.load()) {
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+  app.reset();
   printf("Shutdown complete.\n");
   return 0;
 }
