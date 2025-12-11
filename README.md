@@ -2,27 +2,24 @@
 
 ## Overview
 
-This set of examples demonstrates interoperability between:
+This set of examples demonstrates interoperability between ROS2 Humble pub/sub apps using:
 
-1. ROS Humble pub/sub apps using rmw_connextdds
-2. RTI Connext 7.3.0+ pub/sub apps
-
-It also demonstrates features that have interoperability considerations such as:
-
-1. [Zero Copy over SHMEM](#zero-copy)
+1. rmw_connextdds
+2. native RTI Connext 7.3.0
+3. mixed rmw_connextdds and native RTI Connext 7.3.0
 
 ## Requirements
 
 1. [ROS2 Humble](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html#install-ros-2)
-    * [RTI Connext 6.0.1](https://docs.ros.org/en/humble/Installation/RMW-Implementations/DDS-Implementations/Working-with-RTI-Connext-DDS.html#rti-connext-dds) is the default RMW RTI provides for this ROS2 release.
-2. [RTI Connext 7.3.0+](https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/debian_packages/install.html)
+    * Using [RTI Connext 7.3.0](https://docs.ros.org/en/humble/Installation/RMW-Implementations/DDS-Implementations/Working-with-RTI-Connext-DDS.html#rti-connext-dds) will require [building rmw_connextdds from source](https://docs.ros.org/en/humble/Installation/RMW-Implementations/DDS-Implementations/Working-with-RTI-Connext-DDS.html#building-rmw-connextdds-from-source-code).
+2. [RTI Connext 7.3.0](https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/debian_packages/install.html)
 
 ## Build
 
-*Note: you should setup your RTI Connext build environment to be against the version the native connext app will link against, regardless of the version the ROS2 RMW app will use.*
+*Note: rmw_connextdds should be built against the same version of RTI Connext you plan to build the native Connext components against. You may need to [build rmw_connextdds from source](https://docs.ros.org/en/humble/Installation/RMW-Implementations/DDS-Implementations/Working-with-RTI-Connext-DDS.html#building-rmw-connextdds-from-source-code).*
 
 ```sh
-source /opt/ros/humble/setup.sh
+source /opt/ros/humble/setup.bash
 source /opt/rti.com/rti_connext_dds-7.3.0/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
 cd ros2_ws
 colcon build --symlink-install
@@ -30,17 +27,17 @@ colcon build --symlink-install
 
 ## Run
 
-### ROS2 Run Apps
-
 Common environment:
 
 ```sh
 # Setup the ROS2 environment
 cd ros2_ws
+source /opt/ros/humble/setup.bash
+source /opt/rti.com/rti_connext_dds-7.3.0/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
+source <path/to/rmw_connextdds>/install.setup.bash  # if rmw_connextdds was built from source as a ROS2 package
 source install/setup.bash
 
-# Use rmw_connextdds and setup shared Connext libs
-source /opt/rti.com/rti_connext_dds-6.0.1/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
+# Use rmw_connextdds and point to QoS file
 export RMW_IMPLEMENTATION=rmw_connextdds
 export NDDS_QOS_PROFILES=install/interop_interface/share/interop_interface/config/USER_QOS_PROFILES.xml
 ```
@@ -48,85 +45,101 @@ export NDDS_QOS_PROFILES=install/interop_interface/share/interop_interface/confi
 Publisher:
 
 ```sh
-ros2 run interop_ros2_app interop_publisher 3  # <3> is used as the key 'id' field value of data published
+ros2 run <app_type> interop_publisher 3  # <3> is used as the key 'id' field value of data published
+# <app_type> can be:
+#   - interop_rmw_app
+#   - interop_connext_app
+#   - interop_mixed_app
 ```
 
 Subscriber:
 
 ```sh
-ros2 run interop_ros2_app interop_subscriber
+ros2 run <app_type> interop_subscriber
+# <app_type> can be:
+#   - interop_rmw_app
+#   - interop_connext_app
+#   - interop_mixed_app
 ```
 
-### Connext Run Apps
+## Package Descriptions
 
-Common environment:
+### connextdds_cpp2
+
+This package:
+
+1. Exports the RTIConnextDDS::cpp2_api library (+dependencies) as an ament package.
+2. Installs the rticonnextdds-cmake-utils and loads the path to `CMAKE_MODULE_PATH`.
+
+This package does not build anything. It simply makes the RTI Connext Modern C++ libraries and dependencies available for downstream ament cmake packages.
+
+Before building this package, the RTI environment should be set to properly find Connext libraries:
 
 ```sh
-# Setup the ROS2 environment
-cd ros2_ws
-source install/setup.bash
-
-# Setup shared Connext libs
-source /opt/rti.com/rti_connext_dds-7.3.0/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
-export NDDS_QOS_PROFILES=install/interop_interface/share/interop_interface/config/USER_QOS_PROFILES.xml
+source <path/to/rti_connext_dds-#-#-#>/resource/scripts/rtisetenv_<platform>.bash
 ```
 
-Publisher:
+### connextidl_typesupport_cpp2
 
-```sh
-ros2 run interop_connext_app interop_publisher 4  # <4> is used as the key 'id' field value of data published
+This package implements an extension to the `rosidl_generate_idl_interfaces` extension point to generate code for RTI Connext Modern C++ api.
+
+By finding this package with `find_package(connextidl_typesupport_cpp2)`, a single call to `rosidl_generate_interfaces()`
+will generate code for both default rosidl generators as well as RTI Code Generator.
+
+This package does not build anything. It simply provides a hook to execute RTI Code Generator, and export a library for a set of IDL files passed to `rosidl_generate_interfaces()`.
+
+Usage:
+
+```cmake
+find_package(rosidl_default_generators REQUIRED)
+find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Interop.idl"
+  "msg/Status.idl"
+)
 ```
 
-Subscriber:
+Note: installed Connext headers can be found at either `<package_name>/msg/Foo.hpp` or `connext/<package_name>/msg/Foo.hpp` to avoid header include clashes.
 
-```sh
-ros2 run interop_connext_app interop_subscriber
+To link against only the Connext-generated libraries:
+
+```cmake
+target_link_libraries(myTarget
+    interface_pkg::interface_pkg__connextidl_typesupport_cpp2)
 ```
 
-## Features
+Default rosidl-generated libraries are also available to link against individually, for example `rosidl_typesupport_cpp`:
 
-### Zero Copy
+```cmake
+target_link_libraries(myTarget
+    interface_pkg::interface_pkg__rosidl_typesupport_cpp)
+```
 
-ROS2 cannot leverage RTI Connext Zero Copy with the rmw_connextdds.
-However it can interoperate - it just means that a ZC Connext writer will write plain data to a ROS2 reader. No other api changes or configuration should be needed.
+### interop_interface
 
-See:
+This package demonstrates generating code for both default rosidl generators as well as `connextidl_typesupport_cpp2` for a set of IDL files.
 
-* [Connext: Zero Copy over SHMEM](https://community.rti.com/static/documentation/connext-dds/7.3.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/SendingLDZeroCopyUsing.htm)
+### interop_rmw_app
 
-#### Expected interoperability results
+This package demonstrates building a ROS2 application against libraries from the example `interop_interface` package.
 
-|                         | Connext Pub (Zero Copy) | ROS2 Pub |
-|-------------------------|-------------------------|----------|
-| Connext Sub (Zero Copy) | `SHMEMREF`              | `PLAIN`  |
-| ROS2 Sub                | `PLAIN`                 | `PLAIN`  |
+The publisher and subscriber applications use ROS2 RMW nodes/publishers/subscriptions only.
 
-## Issues
+This package only makes use of the default rosidl-generated code/libraries.
 
-1. Ament build warning for `interop_interface` package.
+### interop_connext_app
 
-    ```none
-    CMake Warning at <...>/ros2_ws/install/interop_interface/share/interop_interface/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake:18 (message):
-        Package 'interop_interface' exports the typesupport target
-        'interop_interface::interop_interface__rosidl_typesupport_cpp' which
-        doesn't exist
-    Call Stack (most recent call first):
-        <...>/ros2_ws/install/interop_interface/share/interop_interface/cmake/interop_interfaceConfig.cmake:41 (include)
-        CMakeLists.txt:11 (find_package)
-    ```
+This package demonstrates building a ROS2 application against libraries from the example `interop_interface` package.
 
-    The build succeeds and the `interop_ros2_app` package builds successfully, linking against the `interop_interface::rosidl_typesupport_cpp` exported target from this package.
+The publisher and subscriber applications use native Connext participants/datawriters/datareaders only.
 
-    This should be reviewed further.
+This package only makes use of the Connext-generated code/libraries.
 
-2. Double free for `interop_connext_app` applications on shutdown.
+### interop_mixed_app
 
-    ```none
-    Shutdown complete.
-    double free or corruption (fasttop)
-    [ros2run]: Aborted
-    ```
+This package demonstrates building a ROS2 application against libraries from the example `interop_interface` package.
 
-    This may have something to do with a dynamic linking issue if both 7.3.0 (from native connext build of `interop_interface`) and 6.0.1 (from `rmw_connextdds`) are both being linked.
+The publisher and subscriber applications use a mix of ROS2 RMW nodes/publishers/subscriptions and native Connext participants/datawriters/datareaders only.
 
-    This should be reviewed further.
+This package makes use of both the default rosidl-generated and Connext-generated code/libraries.

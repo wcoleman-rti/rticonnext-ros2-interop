@@ -14,11 +14,12 @@
 // limitations under the License.
 
 #include <cstdio>
-
-#include <interop_interface/msg/Interop.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-namespace ros2
+#include <interop_interface/msg/interop.hpp>  // rosidl
+#include <interop_interface/msg/status.hpp>   // rosidl
+
+namespace rmw
 {
 
 class InteropSubscriber : public rclcpp::Node
@@ -30,26 +31,28 @@ public:
   {
     // Create a callback function for when messages are received.
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-    auto callback =
+
+    auto msg_callback =
       [this](interop_interface::msg::Interop::ConstSharedPtr msg) -> void
       {
-        RCLCPP_INFO(this->get_logger(), "Received: [id: %ld] %s",msg->id, msg->msg.data());
+        RCLCPP_INFO(this->get_logger(), "Msg Received: [id: %ld] %s",msg->id, msg->msg.data());
         count_++;
       };
-
-    sub_ = create_subscription<interop_interface::msg::Interop>("interop",
+    msg_sub_ = create_subscription<interop_interface::msg::Interop>("interop",
         rclcpp::QoS(rclcpp::KeepLast(100)).best_effort(),
-        callback);
-  }
-
-  void run()
-  {
-    RCLCPP_INFO(this->get_logger(), "Starting"
-      " subscriber");
-
-    while (rclcpp::ok()) {
-      rclcpp::spin_some(shared_from_this());
-    }
+        msg_callback);
+    
+    auto status_callback =
+      [this](interop_interface::msg::Status::ConstSharedPtr msg) -> void
+      {
+        RCLCPP_INFO(this->get_logger(), "Status Received: [id: %ld, count: %ld]",msg->id, msg->msg_count);
+        count_++;
+      };
+    status_sub_ = create_subscription<interop_interface::msg::Status>("interop_status",
+        rclcpp::QoS(rclcpp::KeepLast(1)).best_effort(),
+        status_callback);
+    
+    RCLCPP_INFO(this->get_logger(), "Starting subscriber");
   }
 
   ~InteropSubscriber() override
@@ -58,18 +61,20 @@ public:
   }
 
 private:
-  rclcpp::Subscription<interop_interface::msg::Interop>::SharedPtr sub_;
-  uint32_t count_{0};
+  rclcpp::Subscription<interop_interface::msg::Interop>::SharedPtr msg_sub_ = nullptr;
+  rclcpp::Subscription<interop_interface::msg::Status>::SharedPtr status_sub_ = nullptr;
+  uint32_t count_ = 0;
 };
 
-} // namespace ros2
+} // namespace rmw
 
 
 
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  std::make_shared<ros2::InteropSubscriber>()->run();
+  rclcpp::spin(std::make_shared<rmw::InteropSubscriber>());
   rclcpp::shutdown();
+  printf("Shutdown complete.\n");
   return 0;
 }

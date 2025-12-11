@@ -10,29 +10,32 @@
 * to use the software.
 */
 
+#include <cstdint>
 #include <cstdio>
+#include <memory>
+#include <utility>
 #include <iostream>
-#include <csignal>
+#include <thread>
 #include <atomic>
+#include <csignal>
 
-#include <interop_interface/msg/Interop.hpp>
 #include <dds/dds.hpp>
 #include <rti/rti.hpp>
 #include <rti/sub/SampleProcessor.hpp>
 
+#include <connext/interop_interface/msg/Interop.hpp>  // connextidl
+#include <connext/interop_interface/msg/Status.hpp>   // connextidl
 
 std::atomic<bool> shutdown_requested{false};
 
-inline void stop_handler(int)
-{
-    shutdown_requested.store(true);
-    fprintf(stdout, "preparing to shut down...\n");
-}
-
 inline void setup_signal_handlers()
 {
-    signal(SIGINT, stop_handler);
-    signal(SIGTERM, stop_handler);
+  auto stop_handler = [](int) {
+      shutdown_requested.store(true);
+      fprintf(stdout, "preparing to shut down...\n");
+  };
+  signal(SIGINT, stop_handler);
+  signal(SIGTERM, stop_handler);
 }
 
 namespace connext
@@ -46,38 +49,45 @@ public:
   {
     // Create a callback function for when messages are received.
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-    auto callback =
+    dds::domain::DomainParticipant participant(domain_id, dds::core::QosProvider::Default().participant_qos("QosLibrary::DefaultQos"));
+
+    auto msg_callback =
       [this](const rti::sub::LoanedSample<interop_interface::msg::Interop>& sample) -> void
       {
         if (sample.info().valid()) {
-          if constexpr (rti::zcopy::topic::is_zcopy_type<interop_interface::msg::Interop>::value) {
-            if (!sub_->is_data_consistent(sample)) {
-              return;
-            }
-          }
-          const auto& msg = sample.data();
-          fprintf(stdout, "Received: [id: %ld] %s\n", msg.id(), msg.msg().data());
+          auto && msg = sample.data();
+          fprintf(stdout, "Msg Received: [id: %ld] %s\n", msg.id(), msg.msg().data());
           count_++;
         }
       };
-    
-    dds::domain::DomainParticipant participant(domain_id, dds::core::QosProvider::Default().participant_qos("QosLibrary::DefaultQos"));
-    dds::topic::Topic<interop_interface::msg::Interop> topic(participant, "rt/interop", "interop_interface::msg::dds_::InteropMsg_");
-    sub_ = dds::sub::DataReader<interop_interface::msg::Interop>(
-        topic,
+    dds::topic::Topic<interop_interface::msg::Interop> msg_topic(participant, "rt/interop", "interop_interface::msg::dds_::InteropMsg_");
+    msg_sub_ = dds::sub::DataReader<interop_interface::msg::Interop>(
+      msg_topic,
         dds::core::QosProvider::Default().datareader_qos(
           "QosLibrary::DefaultQos"));
-    msg_processor_.attach_reader(sub_, callback);
-  }
+    msg_processor_.attach_reader(msg_sub_, msg_callback);
 
-  void run()
-  {
-    fprintf(stdout, "Starting" 
-        " (SHMEM_REF)"
-        " subscriber\n");
+    auto status_callback =
+      [this](const rti::sub::LoanedSample<interop_interface::msg::Status>& sample) -> void
+      {
+        if (sample.info().valid()) {
+          auto && msg = sample.data();
+          fprintf(stdout, "Status Received: [id: %ld, count: %ld]\n", msg.id(), msg.msg_count());
+          count_++;
+        }
+      };
+    dds::topic::Topic<interop_interface::msg::Status> status_topic(participant, "rt/interop_status", "interop_interface::msg::dds_::StatusMsg_");
+    status_sub_ = dds::sub::DataReader<interop_interface::msg::Status>(
+      status_topic,
+        dds::core::QosProvider::Default().datareader_qos(
+          "QosLibrary::DefaultQos"));
+    msg_processor_.attach_reader(status_sub_, status_callback);
+
+    fprintf(stdout, "Starting subscriber\n");
+    participant.enable();
 
     while (!shutdown_requested.load()) {
-        rti::util::sleep(dds::core::Duration(1));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
   }
 
@@ -87,9 +97,10 @@ public:
   }
 
 private:
-  dds::sub::DataReader<interop_interface::msg::Interop> sub_ = dds::core::null;
+  dds::sub::DataReader<interop_interface::msg::Interop> msg_sub_ = nullptr;
+  dds::sub::DataReader<interop_interface::msg::Status> status_sub_ = nullptr;
   rti::sub::SampleProcessor msg_processor_;
-  uint32_t count_{0};
+  uint32_t count_ = 0;
 };
 
 } // namespace connext
@@ -101,7 +112,7 @@ int main(int argc, char * argv[])
   setup_signal_handlers();
   (void)argc;
   (void)argv;
-  std::make_shared<connext::InteropSubscriber>()->run();
-  dds::domain::DomainParticipant::finalize_participant_factory();
+  std::make_shared<connext::InteropSubscriber>();
+  printf("Shutdown complete.\n");
   return 0;
 }

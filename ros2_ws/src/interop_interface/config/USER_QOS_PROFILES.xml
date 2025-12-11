@@ -77,6 +77,5 @@ XML" chapter in the RTI Connext DDS Core Libraries User's Manual.
                 </history>
             </datareader_qos>
         </qos_profile>
-
     </qos_library>
 </dds>

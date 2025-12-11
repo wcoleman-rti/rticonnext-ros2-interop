@@ -5,9 +5,9 @@
 
 module interop_interface {
   module msg {
-    struct Interop {
+    struct Status {
       int64 id;
-      char msg[256];
+      uint64 msg_count;
     };
   };
 };

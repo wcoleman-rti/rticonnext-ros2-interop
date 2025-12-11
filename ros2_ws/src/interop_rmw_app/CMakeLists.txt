@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(interop_ros2_app)
+project(interop_rmw_app)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -17,26 +17,26 @@ add_executable(interop_subscriber src/interop_subscriber.cpp)
 # Include headers
 target_include_directories(interop_publisher 
   PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 target_include_directories(interop_subscriber
   PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 # Link against the generated typesupport library
-target_link_libraries(interop_publisher
-    interop_interface::rosidl_typesupport_cpp
-    rclcpp::rclcpp)
-target_link_libraries(interop_subscriber
-    interop_interface::rosidl_typesupport_cpp
-    rclcpp::rclcpp)
-# ament_target_dependencies(interop_publisher
-#     interop_interface
-#     rclcpp)
-# ament_target_dependencies(interop_subscriber
-#     interop_interface
-#     rclcpp)
+# Use ament_target_dependencies to link at the package level
+ament_target_dependencies(interop_publisher
+  interop_interface
+  rclcpp)
+ament_target_dependencies(interop_subscriber
+  interop_interface
+  rclcpp)
+# Alternatively, link against the explicit typesupport library
+# target_link_libraries(interop_publisher
+#     interop_interface::interop_interface__rosidl_typesupport_cpp
+#     rclcpp::rclcpp)
+# target_link_libraries(interop_subscriber
+#     interop_interface::interop_interface__rosidl_typesupport_cpp
+#     rclcpp::rclcpp)
 
 # Require C99 and C++17
 target_compile_features(interop_publisher PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17

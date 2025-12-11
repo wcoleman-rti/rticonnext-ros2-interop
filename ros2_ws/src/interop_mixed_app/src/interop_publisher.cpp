@@ -18,24 +18,42 @@
 #include <memory>
 #include <utility>
 #include <iostream>
+#include <thread>
+#include <atomic>
 
-#include <interop_interface/msg/Interop.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <dds/dds.hpp>
+#include <rti/rti.hpp>
 
-namespace ros2
+#include <interop_interface/msg/interop.hpp>          // rosidl
+#include <connext/interop_interface/msg/Status.hpp>   // connextidl
+
+namespace mixed
 {
 
 class InteropPublisher : public rclcpp::Node
 {
 public:
 
-  explicit InteropPublisher(int id = 0)
+  explicit InteropPublisher(int id = 0, unsigned int domain_id = 0)
   : Node("interop_publisher"), id_(id)
   {
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-    pub_ = this->create_publisher<interop_interface::msg::Interop>(
+    dds::domain::DomainParticipant participant(domain_id, dds::core::QosProvider::Default().participant_qos("QosLibrary::DefaultQos"));
+
+    msg_pub_ = this->create_publisher<interop_interface::msg::Interop>(
         "interop",
         rclcpp::QoS(rclcpp::KeepLast(1)).best_effort());
+    
+    dds::topic::Topic<interop_interface::msg::Status> status_topic(participant, "rt/interop_status", "interop_interface::msg::dds_::StatusMsg_");
+    status_pub_ = dds::pub::DataWriter<interop_interface::msg::Status>(
+        status_topic, 
+        dds::core::QosProvider::Default().datawriter_qos(
+          "QosLibrary::DefaultQos"));
+    
+    participant.enable();
+
+    input_thread_ = std::thread(&InteropPublisher::run, this);
   }
 
   void run()
@@ -44,7 +62,7 @@ public:
       " publisher with id %d", id_);
 
     std::string user_input;
-    while (rclcpp::ok()) {
+    while (rclcpp::ok() && !stop_thread_.load()) {
       std::cout << "> ";
       // Use std::getline to read the entire line, including spaces, until Enter is pressed
       if (std::getline(std::cin, user_input))
@@ -56,9 +74,17 @@ public:
             interop_msg->id = id_;
             strncpy(reinterpret_cast<char*>(interop_msg->msg.data()), user_input.c_str(), sizeof(interop_msg->msg) - 1);
             interop_msg->msg[sizeof(interop_msg->msg) - 1] = '\0'; // Ensure null termination
-            RCLCPP_INFO(this->get_logger(), "Publishing: [id: %ld] %s", interop_msg->id, interop_msg->msg.data());
-            pub_->publish(std::move(interop_msg));
+            RCLCPP_INFO(this->get_logger(), "Publishing Msg: [id: %ld] %s", interop_msg->id, interop_msg->msg.data());
+            msg_pub_->publish(std::move(interop_msg));
             count_++;
+
+            if (count_ % 4 == 0) {
+              auto status_msg = std::make_unique<interop_interface::msg::Status>();
+              status_msg->id(id_);
+              status_msg->msg_count(count_);
+              RCLCPP_INFO(this->get_logger(), "Publishing Status: [id: %ld, count: %ld]", status_msg->id(), status_msg->msg_count());
+              status_pub_.write(*status_msg);
+            }
           }
       }
       else
@@ -67,24 +93,29 @@ public:
           RCLCPP_INFO(this->get_logger(), "Input stream closed. Exiting...");
           break;
       }
-
-      // Allow the ROS 2 executor to process the publication
-      rclcpp::spin_some(shared_from_this());
     }
   }
 
   ~InteropPublisher() override
   {
+    RCLCPP_INFO(this->get_logger(), "Shutting down publisher with id %d", id_);
+    if (input_thread_.joinable()) {
+      stop_thread_.store(true);
+      input_thread_.join();
+    }
     RCLCPP_INFO(this->get_logger(), "Finalized publisher with id %d, published %d msgs", id_, count_);
   }
 
 private:
   uint16_t id_;
-  rclcpp::Publisher<interop_interface::msg::Interop>::SharedPtr pub_;
-  uint32_t count_{0};
+  rclcpp::Publisher<interop_interface::msg::Interop>::SharedPtr msg_pub_ = nullptr;
+  dds::pub::DataWriter<interop_interface::msg::Status> status_pub_ = nullptr;
+  uint32_t count_ = 0;
+  std::atomic<bool> stop_thread_ = false;
+  std::thread input_thread_;
 };
 
-} // namespace ros2
+} // namespace mixed
 
 int main(int argc, char * argv[])
 {
@@ -93,7 +124,8 @@ int main(int argc, char * argv[])
   if (argc > 1) {
     id = std::atoi(argv[1]);
   }
-  std::make_shared<ros2::InteropPublisher>(id)->run();
+  rclcpp::spin(std::make_shared<mixed::InteropPublisher>(id));
   rclcpp::shutdown();
+  printf("Shutdown complete.\n");
   return 0;
 }

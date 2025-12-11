@@ -1,0 +1,4 @@
+# Append the rti cmake utils directory to CMAKE_MODULE_PATH for downstream packages
+list(APPEND CMAKE_MODULE_PATH
+  "${CMAKE_CURRENT_LIST_DIR}/rticonnextdds-cmake-utils/cmake/Modules"
+)
