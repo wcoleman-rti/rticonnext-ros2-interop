@@ -1,5 +1,6 @@
-[submodule "ros2_overlay_ws/src/common_interfaces"]
-	path = ros2_overlay_ws/src/common_interfaces
-[submodule "ros2_overlay_ws/src/rcl_interfaces"]
-	path = ros2_overlay_ws/src/rcl_interfaces
+[submodule "ros2_ws/src/common_interfaces"]
+	path = ros2_ws/src/common_interfaces
+	url = https://github.com/ros2/common_interfaces.git
+[submodule "ros2_ws/src/rcl_interfaces"]
+	path = ros2_ws/src/rcl_interfaces
 	url = https://github.com/ros2/rcl_interfaces.git
