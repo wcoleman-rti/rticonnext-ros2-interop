@@ -4,8 +4,12 @@ project(connextidl_typesupport_cpp2)
 find_package(ament_cmake REQUIRED)
 find_package(connextdds_cpp2 REQUIRED)
 
+# ============================================
+# Install core package files
+# ============================================
 ament_package(
-  CONFIG_EXTRAS "connextidl_typesupport_cpp2-extras.cmake.in"
+  CONFIG_EXTRAS 
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/connextidl_typesupport_cpp2-extras.cmake.in"
 )
 
 install(
