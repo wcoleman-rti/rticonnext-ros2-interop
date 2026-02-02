@@ -1,0 +1,219 @@
+From 333e276b156dd8c86b9b335deff1528236a3c062 Mon Sep 17 00:00:00 2001
+From: Will Coleman <wcoleman@rti.com>
+Date: Thu, 29 Jan 2026 15:57:09 -0800
+Subject: [PATCH] add: connextidl_typesupport_cpp2
+
+---
+ action_msgs/CMakeLists.txt            | 1 +
+ action_msgs/package.xml               | 1 +
+ builtin_interfaces/CMakeLists.txt     | 1 +
+ builtin_interfaces/package.xml        | 1 +
+ composition_interfaces/CMakeLists.txt | 1 +
+ composition_interfaces/package.xml    | 1 +
+ lifecycle_msgs/CMakeLists.txt         | 1 +
+ lifecycle_msgs/package.xml            | 1 +
+ rcl_interfaces/CMakeLists.txt         | 1 +
+ rcl_interfaces/package.xml            | 1 +
+ rosgraph_msgs/CMakeLists.txt          | 1 +
+ rosgraph_msgs/package.xml             | 1 +
+ statistics_msgs/CMakeLists.txt        | 1 +
+ statistics_msgs/package.xml           | 1 +
+ test_msgs/CMakeLists.txt              | 1 +
+ test_msgs/package.xml                 | 1 +
+ 16 files changed, 16 insertions(+)
+
+diff --git a/action_msgs/CMakeLists.txt b/action_msgs/CMakeLists.txt
+index 003082c..8ab22db 100644
+--- a/action_msgs/CMakeLists.txt
++++ b/action_msgs/CMakeLists.txt
+@@ -13,6 +13,7 @@ endif()
+ find_package(ament_cmake REQUIRED)
+ find_package(builtin_interfaces REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ find_package(unique_identifier_msgs REQUIRED)
+ 
+ set(msg_files
+diff --git a/action_msgs/package.xml b/action_msgs/package.xml
+index fbcd4c5..a69d27e 100644
+--- a/action_msgs/package.xml
++++ b/action_msgs/package.xml
+@@ -15,6 +15,7 @@
+ 
+   <buildtool_depend>ament_cmake</buildtool_depend>
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <depend>builtin_interfaces</depend>
+   <depend>unique_identifier_msgs</depend>
+diff --git a/builtin_interfaces/CMakeLists.txt b/builtin_interfaces/CMakeLists.txt
+index 23741d5..e52ca68 100644
+--- a/builtin_interfaces/CMakeLists.txt
++++ b/builtin_interfaces/CMakeLists.txt
+@@ -12,6 +12,7 @@ endif()
+ 
+ find_package(ament_cmake REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ 
+ rosidl_generate_interfaces(${PROJECT_NAME}
+   "msg/Duration.msg"
+diff --git a/builtin_interfaces/package.xml b/builtin_interfaces/package.xml
+index e44d97a..b4091fc 100644
+--- a/builtin_interfaces/package.xml
++++ b/builtin_interfaces/package.xml
+@@ -15,6 +15,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <exec_depend>rosidl_default_runtime</exec_depend>
+ 
+diff --git a/composition_interfaces/CMakeLists.txt b/composition_interfaces/CMakeLists.txt
+index 017cef7..7df3ff0 100644
+--- a/composition_interfaces/CMakeLists.txt
++++ b/composition_interfaces/CMakeLists.txt
+@@ -12,6 +12,7 @@ endif()
+ 
+ find_package(ament_cmake REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ find_package(rcl_interfaces REQUIRED)
+ 
+ rosidl_generate_interfaces(${PROJECT_NAME}
+diff --git a/composition_interfaces/package.xml b/composition_interfaces/package.xml
+index 6cc34ba..ea7bc39 100644
+--- a/composition_interfaces/package.xml
++++ b/composition_interfaces/package.xml
+@@ -15,6 +15,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <depend>rcl_interfaces</depend>
+ 
+diff --git a/lifecycle_msgs/CMakeLists.txt b/lifecycle_msgs/CMakeLists.txt
+index 9808f48..70583b1 100644
+--- a/lifecycle_msgs/CMakeLists.txt
++++ b/lifecycle_msgs/CMakeLists.txt
+@@ -12,6 +12,7 @@ endif()
+ 
+ find_package(ament_cmake REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ 
+ set(msg_files
+   "msg/State.msg"
+diff --git a/lifecycle_msgs/package.xml b/lifecycle_msgs/package.xml
+index 910c0a2..70cc71c 100644
+--- a/lifecycle_msgs/package.xml
++++ b/lifecycle_msgs/package.xml
+@@ -14,6 +14,7 @@
+ 
+   <buildtool_depend>ament_cmake</buildtool_depend>
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <exec_depend>rosidl_default_runtime</exec_depend>
+ 
+diff --git a/rcl_interfaces/CMakeLists.txt b/rcl_interfaces/CMakeLists.txt
+index 8ed4e19..d8226c6 100644
+--- a/rcl_interfaces/CMakeLists.txt
++++ b/rcl_interfaces/CMakeLists.txt
+@@ -12,6 +12,7 @@ endif()
+ 
+ find_package(ament_cmake REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ find_package(builtin_interfaces REQUIRED)
+ 
+ rosidl_generate_interfaces(${PROJECT_NAME}
+diff --git a/rcl_interfaces/package.xml b/rcl_interfaces/package.xml
+index 85e3938..231e9df 100644
+--- a/rcl_interfaces/package.xml
++++ b/rcl_interfaces/package.xml
+@@ -17,6 +17,7 @@
+ 
+   <buildtool_depend>ament_cmake</buildtool_depend>
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <depend>builtin_interfaces</depend>
+ 
+diff --git a/rosgraph_msgs/CMakeLists.txt b/rosgraph_msgs/CMakeLists.txt
+index a7dcc80..a41c724 100644
+--- a/rosgraph_msgs/CMakeLists.txt
++++ b/rosgraph_msgs/CMakeLists.txt
+@@ -13,6 +13,7 @@ endif()
+ find_package(ament_cmake REQUIRED)
+ find_package(builtin_interfaces REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ 
+ set(msg_files
+   "msg/Clock.msg"
+diff --git a/rosgraph_msgs/package.xml b/rosgraph_msgs/package.xml
+index 2a1fed9..ed1695f 100644
+--- a/rosgraph_msgs/package.xml
++++ b/rosgraph_msgs/package.xml
+@@ -18,6 +18,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <build_depend>builtin_interfaces</build_depend>
+ 
+diff --git a/statistics_msgs/CMakeLists.txt b/statistics_msgs/CMakeLists.txt
+index 2c92be9..8a39bc6 100644
+--- a/statistics_msgs/CMakeLists.txt
++++ b/statistics_msgs/CMakeLists.txt
+@@ -14,6 +14,7 @@ endif()
+ find_package(ament_cmake REQUIRED)
+ find_package(builtin_interfaces REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ 
+ # Generate added messages with dependencies listed here
+ rosidl_generate_interfaces(${PROJECT_NAME}
+diff --git a/statistics_msgs/package.xml b/statistics_msgs/package.xml
+index 6f7bb8a..e2d88ed 100644
+--- a/statistics_msgs/package.xml
++++ b/statistics_msgs/package.xml
+@@ -14,6 +14,7 @@
+ 
+   <buildtool_depend>ament_cmake</buildtool_depend>
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <build_depend>builtin_interfaces</build_depend>
+ 
+diff --git a/test_msgs/CMakeLists.txt b/test_msgs/CMakeLists.txt
+index d39326e..c2b2a0a 100644
+--- a/test_msgs/CMakeLists.txt
++++ b/test_msgs/CMakeLists.txt
+@@ -18,6 +18,7 @@ endif()
+ find_package(ament_cmake REQUIRED)
+ find_package(builtin_interfaces REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ find_package(test_interface_files REQUIRED)
+ 
+ # TODO(sloretz) Change to test_msgs_interfaces when ros2/rosidl_typesupport#120 is fixed
+diff --git a/test_msgs/package.xml b/test_msgs/package.xml
+index 1e9cc17..70c7e75 100644
+--- a/test_msgs/package.xml
++++ b/test_msgs/package.xml
+@@ -15,6 +15,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <build_depend>builtin_interfaces</build_depend>
+   <build_depend>test_interface_files</build_depend>
+-- 
+2.34.1
+

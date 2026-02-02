@@ -22,6 +22,10 @@ This set of examples demonstrates interoperability between ROS2 Humble pub/sub a
 # Add/update submodules (for: builtin_interfaces, std_msgs)
 git submodule update --init --recursive
 
+# Apply local patches to submodules
+git apply --directory=ros2_ws/src/common_interfaces patches/common_interfaces/*.patch
+git apply --directory=ros2_ws/src/rcl_interfaces patches/rcl_interfaces/*.patch
+
 # Setup the ROS2 environment
 source /opt/ros/humble/setup.bash
 source /opt/rti.com/rti_connext_dds-7.3.0/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
@@ -144,12 +148,44 @@ This package makes use of both the default rosidl-generated and Connext-generate
 
 Since *connextidl_typesupport_cpp2* is a `rosidl_generate_idl_interfaces` extension point, it means that packages available as part of the ROS2 distro/installation (e.g. *std_msgs*), have not had connextidl typesupport code generated and available as a dependency. To use a ROS2 distro package as a dependency, you should perform a source-overlay build - that is, rebuild the package, but this time with the extension point registered.
 
-In this repository, `SurgeryCommand` and `SurgeryState` both make use of `std_msgs/Header` from the *std_msgs* ROS2 distro package. Therefore to use this member type with connextidl typesupport, *std_msgs* and all of its dependencies must be rebuilt as overlay packages with *connextidl_typesupport_cpp2* registered. This is done by pulling in the ROS2 *[rcl_interfaces](https://github.com/ros2/rcl_interfaces.git)* and *[common_interfaces](https://github.com/ros2/common_interfaces.git)* repositories as git submodules.
+In this repository, `SurgeryCommand` and `SurgeryState` both make use of `std_msgs/Header` from the *std_msgs* ROS2 distro package. Therefore to use this member type with connextidl typesupport, *std_msgs* and all of its dependencies must be rebuilt as overlay packages with *connextidl_typesupport_cpp2* registered. This is done by pulling in the ROS2 *[rcl_interfaces](https://github.com/ros2/rcl_interfaces.git)* and *[common_interfaces](https://github.com/ros2/common_interfaces.git)* repositories as git submodules and applying patches on top of them to include *connextidl_typesupport_cpp2* as a generator.
 
 When building with colcon, you can acknowledge and suppress warnings for building overlay packages by using the `--allow-overriding` argument.
 
-```shell
+```sh
 colcon build <...> --allow-overriding builtin_interfaces std_msgs
+```
+
+### Regenerating Submodule Patches
+
+If you need to modify the submodule code (common_interfaces or rcl_interfaces), follow these steps to regenerate the patches:
+
+```sh
+# 1. Make your changes in the submodule directory
+cd ros2_ws/src/common_interfaces  # or rcl_interfaces
+# ... edit files ...
+
+# 2. Commit your changes IN THE SUBMODULE (not the parent repo!)
+git add .
+git commit -m "Description of your changes"
+
+# 3. Regenerate the patch files
+git format-patch origin/humble..HEAD -o ../../../patches/common_interfaces
+
+# 4. Return to parent repo and commit ONLY the updated patches
+cd ../../..
+git add patches/
+git commit -m "Update submodule patches"
+
+# 5. IMPORTANT: Ensure submodule changes are NOT staged in parent repo
+#    Unless the submodules are moved to forks, we want the submodules to 
+#    point to an existing upstream commits.
+# If you accidentally staged the submodule, unstage it:
+git restore --staged ros2_ws/src/common_interfaces  # if needed
+git restore --staged ros2_ws/src/rcl_interfaces     # if needed
+
+# 6. Verify submodules are not showing as modified
+git status  # Should show only patches/ as changed
 ```
 
 ## Known Issues

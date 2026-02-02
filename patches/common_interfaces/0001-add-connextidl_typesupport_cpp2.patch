@@ -1,0 +1,297 @@
+From 947dfc946f4678ab3bf39e9aeff4a6d9fba83867 Mon Sep 17 00:00:00 2001
+From: Will Coleman <wcoleman@rti.com>
+Date: Thu, 29 Jan 2026 15:56:58 -0800
+Subject: [PATCH] add: connextidl_typesupport_cpp2
+
+---
+ actionlib_msgs/CMakeLists.txt     | 1 +
+ actionlib_msgs/package.xml        | 1 +
+ diagnostic_msgs/CMakeLists.txt    | 1 +
+ diagnostic_msgs/package.xml       | 1 +
+ geometry_msgs/CMakeLists.txt      | 1 +
+ geometry_msgs/package.xml         | 1 +
+ nav_msgs/CMakeLists.txt           | 1 +
+ nav_msgs/package.xml              | 1 +
+ sensor_msgs/CMakeLists.txt        | 1 +
+ sensor_msgs/package.xml           | 1 +
+ shape_msgs/CMakeLists.txt         | 1 +
+ shape_msgs/package.xml            | 1 +
+ std_msgs/CMakeLists.txt           | 1 +
+ std_msgs/package.xml              | 1 +
+ std_srvs/CMakeLists.txt           | 1 +
+ std_srvs/package.xml              | 1 +
+ stereo_msgs/CMakeLists.txt        | 1 +
+ stereo_msgs/package.xml           | 1 +
+ trajectory_msgs/CMakeLists.txt    | 1 +
+ trajectory_msgs/package.xml       | 1 +
+ visualization_msgs/CMakeLists.txt | 1 +
+ visualization_msgs/package.xml    | 1 +
+ 22 files changed, 22 insertions(+)
+
+diff --git a/actionlib_msgs/CMakeLists.txt b/actionlib_msgs/CMakeLists.txt
+index 8fa60ec..520a623 100644
+--- a/actionlib_msgs/CMakeLists.txt
++++ b/actionlib_msgs/CMakeLists.txt
+@@ -13,6 +13,7 @@ endif()
+ find_package(ament_cmake REQUIRED)
+ find_package(builtin_interfaces REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ find_package(std_msgs REQUIRED)
+ 
+ set(msg_files
+diff --git a/actionlib_msgs/package.xml b/actionlib_msgs/package.xml
+index 18a6669..bc4d37a 100644
+--- a/actionlib_msgs/package.xml
++++ b/actionlib_msgs/package.xml
+@@ -17,6 +17,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <depend>builtin_interfaces</depend>
+   <depend>std_msgs</depend>
+diff --git a/diagnostic_msgs/CMakeLists.txt b/diagnostic_msgs/CMakeLists.txt
+index 6de26ca..d36def7 100644
+--- a/diagnostic_msgs/CMakeLists.txt
++++ b/diagnostic_msgs/CMakeLists.txt
+@@ -12,6 +12,7 @@ endif()
+ 
+ find_package(ament_cmake REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ find_package(std_msgs REQUIRED)
+ 
+ set(msg_files
+diff --git a/diagnostic_msgs/package.xml b/diagnostic_msgs/package.xml
+index ce24288..7c4b3ba 100644
+--- a/diagnostic_msgs/package.xml
++++ b/diagnostic_msgs/package.xml
+@@ -17,6 +17,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <depend>builtin_interfaces</depend>
+   <depend>geometry_msgs</depend>
+diff --git a/geometry_msgs/CMakeLists.txt b/geometry_msgs/CMakeLists.txt
+index 89e4e17..2a7d0fe 100644
+--- a/geometry_msgs/CMakeLists.txt
++++ b/geometry_msgs/CMakeLists.txt
+@@ -12,6 +12,7 @@ endif()
+ 
+ find_package(ament_cmake REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ find_package(std_msgs REQUIRED)
+ 
+ set(msg_files
+diff --git a/geometry_msgs/package.xml b/geometry_msgs/package.xml
+index 0dc8c7f..4974be3 100644
+--- a/geometry_msgs/package.xml
++++ b/geometry_msgs/package.xml
+@@ -17,6 +17,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <depend>std_msgs</depend>
+ 
+diff --git a/nav_msgs/CMakeLists.txt b/nav_msgs/CMakeLists.txt
+index d4dc24c..13de836 100644
+--- a/nav_msgs/CMakeLists.txt
++++ b/nav_msgs/CMakeLists.txt
+@@ -14,6 +14,7 @@ find_package(ament_cmake REQUIRED)
+ find_package(builtin_interfaces REQUIRED)
+ find_package(geometry_msgs REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ find_package(std_msgs REQUIRED)
+ 
+ set(msg_files
+diff --git a/nav_msgs/package.xml b/nav_msgs/package.xml
+index 2fc3161..fd2c658 100644
+--- a/nav_msgs/package.xml
++++ b/nav_msgs/package.xml
+@@ -17,6 +17,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <depend>builtin_interfaces</depend>
+   <depend>geometry_msgs</depend>
+diff --git a/sensor_msgs/CMakeLists.txt b/sensor_msgs/CMakeLists.txt
+index 8027c23..6a7174b 100644
+--- a/sensor_msgs/CMakeLists.txt
++++ b/sensor_msgs/CMakeLists.txt
+@@ -14,6 +14,7 @@ find_package(ament_cmake REQUIRED)
+ find_package(builtin_interfaces REQUIRED)
+ find_package(geometry_msgs REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ find_package(std_msgs REQUIRED)
+ 
+ set(msg_files
+diff --git a/sensor_msgs/package.xml b/sensor_msgs/package.xml
+index dcca753..a98377f 100644
+--- a/sensor_msgs/package.xml
++++ b/sensor_msgs/package.xml
+@@ -17,6 +17,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <depend>builtin_interfaces</depend>
+   <depend>geometry_msgs</depend>
+diff --git a/shape_msgs/CMakeLists.txt b/shape_msgs/CMakeLists.txt
+index 109df73..dd23633 100644
+--- a/shape_msgs/CMakeLists.txt
++++ b/shape_msgs/CMakeLists.txt
+@@ -13,6 +13,7 @@ endif()
+ find_package(ament_cmake REQUIRED)
+ find_package(geometry_msgs REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ 
+ set(msg_files
+   "msg/Mesh.msg"
+diff --git a/shape_msgs/package.xml b/shape_msgs/package.xml
+index f761c47..73d234f 100644
+--- a/shape_msgs/package.xml
++++ b/shape_msgs/package.xml
+@@ -17,6 +17,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <depend>geometry_msgs</depend>
+   <exec_depend>rosidl_default_runtime</exec_depend>
+diff --git a/std_msgs/CMakeLists.txt b/std_msgs/CMakeLists.txt
+index 354f1a9..50e93c0 100644
+--- a/std_msgs/CMakeLists.txt
++++ b/std_msgs/CMakeLists.txt
+@@ -13,6 +13,7 @@ endif()
+ find_package(ament_cmake REQUIRED)
+ find_package(builtin_interfaces REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ 
+ set(msg_files
+   "msg/Bool.msg"
+diff --git a/std_msgs/package.xml b/std_msgs/package.xml
+index dc3ddb0..4805fa4 100644
+--- a/std_msgs/package.xml
++++ b/std_msgs/package.xml
+@@ -17,6 +17,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <depend>builtin_interfaces</depend>
+   <exec_depend>rosidl_default_runtime</exec_depend>
+diff --git a/std_srvs/CMakeLists.txt b/std_srvs/CMakeLists.txt
+index 17e76d2..687cc2d 100644
+--- a/std_srvs/CMakeLists.txt
++++ b/std_srvs/CMakeLists.txt
+@@ -12,6 +12,7 @@ endif()
+ 
+ find_package(ament_cmake REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ 
+ set(srv_files
+   "srv/Empty.srv"
+diff --git a/std_srvs/package.xml b/std_srvs/package.xml
+index 1348ea2..2ad7cfd 100644
+--- a/std_srvs/package.xml
++++ b/std_srvs/package.xml
+@@ -17,6 +17,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <exec_depend>rosidl_default_runtime</exec_depend>
+ 
+diff --git a/stereo_msgs/CMakeLists.txt b/stereo_msgs/CMakeLists.txt
+index 99da8dc..eadcb4a 100644
+--- a/stereo_msgs/CMakeLists.txt
++++ b/stereo_msgs/CMakeLists.txt
+@@ -12,6 +12,7 @@ endif()
+ 
+ find_package(ament_cmake REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ find_package(sensor_msgs REQUIRED)
+ find_package(std_msgs REQUIRED)
+ 
+diff --git a/stereo_msgs/package.xml b/stereo_msgs/package.xml
+index 9d8cc74..109cca4 100644
+--- a/stereo_msgs/package.xml
++++ b/stereo_msgs/package.xml
+@@ -17,6 +17,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <depend>sensor_msgs</depend>
+   <depend>std_msgs</depend>
+diff --git a/trajectory_msgs/CMakeLists.txt b/trajectory_msgs/CMakeLists.txt
+index 48d48bc..4117089 100644
+--- a/trajectory_msgs/CMakeLists.txt
++++ b/trajectory_msgs/CMakeLists.txt
+@@ -14,6 +14,7 @@ find_package(ament_cmake REQUIRED)
+ find_package(builtin_interfaces REQUIRED)
+ find_package(geometry_msgs REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ find_package(std_msgs REQUIRED)
+ 
+ set(msg_files
+diff --git a/trajectory_msgs/package.xml b/trajectory_msgs/package.xml
+index 5d8da8a..c34a73a 100644
+--- a/trajectory_msgs/package.xml
++++ b/trajectory_msgs/package.xml
+@@ -17,6 +17,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <depend>builtin_interfaces</depend>
+   <depend>geometry_msgs</depend>
+diff --git a/visualization_msgs/CMakeLists.txt b/visualization_msgs/CMakeLists.txt
+index 7a239b4..ef7984b 100644
+--- a/visualization_msgs/CMakeLists.txt
++++ b/visualization_msgs/CMakeLists.txt
+@@ -14,6 +14,7 @@ find_package(ament_cmake REQUIRED)
+ find_package(builtin_interfaces REQUIRED)
+ find_package(geometry_msgs REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
++find_package(connextidl_typesupport_cpp2 REQUIRED)  # Native Connext "modern" C++ code generation
+ find_package(sensor_msgs REQUIRED)
+ find_package(std_msgs REQUIRED)
+ 
+diff --git a/visualization_msgs/package.xml b/visualization_msgs/package.xml
+index 0293bce..b6abc1a 100644
+--- a/visualization_msgs/package.xml
++++ b/visualization_msgs/package.xml
+@@ -17,6 +17,7 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+   <buildtool_depend>rosidl_default_generators</buildtool_depend>
++  <buildtool_depend>connextidl_typesupport_cpp2</buildtool_depend>
+ 
+   <depend>builtin_interfaces</depend>
+   <depend>geometry_msgs</depend>
+-- 
+2.34.1
+
