@@ -63,6 +63,13 @@ macro(sanitize_idl_file INPUT_IDL OUTPUT_IDL_VAR)
   endif()
 endmacro()
 
+macro(get_idl_include_dir IDL_FILE OUTPUT_DIR_VAR)
+  get_filename_component(_idl_include_dir "${IDL_FILE}" DIRECTORY)
+  get_filename_component(_idl_include_dir "${_idl_include_dir}" DIRECTORY)
+  get_filename_component(_idl_include_dir "${_idl_include_dir}" DIRECTORY)
+  set(${OUTPUT_DIR_VAR} "${_idl_include_dir}")
+endmacro()
+
 
 set(_dependency_files "")
 set(_dependencies_include_dirs "")
@@ -76,12 +83,9 @@ foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
     sanitize_idl_file("${_abs_idl_file}" _sanitized_idl_file)
     
     # Determine include directory for this dependency
-    get_filename_component(_sanitized_idl_include_dir "${_sanitized_idl_file}" DIRECTORY)
-    get_filename_component(_sanitized_idl_include_dir "${_sanitized_idl_include_dir}" DIRECTORY)
-    get_filename_component(_sanitized_idl_include_dir "${_sanitized_idl_include_dir}" DIRECTORY)
+    get_idl_include_dir("${_sanitized_idl_file}" _sanitized_idl_include_dir)
     message(STATUS "Dependency package '${_pkg_name}' IDL include dir: ${_sanitized_idl_include_dir}")
     list(APPEND _dependencies_include_dirs "${_sanitized_idl_include_dir}")
-    # list(APPEND _dependencies_include_dirs "${${_pkg_name}_DIR}/../..")
 
     list(APPEND _dependency_files "${_sanitized_idl_file}")
     list(APPEND _dependencies "${_pkg_name}:${_abs_idl_file}")
@@ -123,13 +127,18 @@ foreach(_idl_tuple ${rosidl_generate_interfaces_IDL_TUPLES})
   message(STATUS "======================================")
   message(STATUS "Generating Connext typesupport for: ${_abs_idl_file}")
   message(STATUS "  IDL name: ${_idl_name}")
-  message(STATUS "  Include dirs: ${_dependencies_include_dirs}")
+  message(STATUS "  Dependencies include dirs: ${_dependencies_include_dirs}")
   
   # Apply any necessary sanitization to the IDL file
   # (e.g., stripping @verbatim annotations for certain RTI versions)
   # Note: This creates a modified copy of the IDL file in the build directory
   #  to avoid altering the original source file.
   sanitize_idl_file("${_abs_idl_file}" _idl_file)
+
+  # Determine include directory for this IDL file
+  get_idl_include_dir("${_idl_file}" _idl_include_dir)
+  message(STATUS "  IDL include dir: ${_idl_include_dir}")
+
 
   connextdds_rtiddsgen_run(
     VAR "${_idl_name}"
@@ -138,7 +147,7 @@ foreach(_idl_tuple ${rosidl_generate_interfaces_IDL_TUPLES})
     LANG ${LANG}
     # DISABLE_PREPROCESSOR
     # DEPENDS ${target_dependencies}
-    INCLUDE_DIRS ${_dependencies_include_dirs}
+    INCLUDE_DIRS ${_dependencies_include_dirs} ${_idl_include_dir}
     EXTRA_ARGS ${_rtiddsgen_extra_args}
   )
 
